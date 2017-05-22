@@ -151,7 +151,7 @@ def main():
                     plt.plot(state_pt[0],state_pt[1], 'b+')
                     plt.plot(new_state_pt[0],new_state_pt[1], 'ro')
                     rect = patches.Rectangle((new_state_pt[0]-13.5,new_state_pt[1]-13.5), 28, 28,
-                                              linewidth=1, edgecolor='b', facecolor='none')
+                                             linewidth=1, edgecolor='b', facecolor='none')
                     rect2 = patches.Rectangle((gt[0]-28, gt[1]-28), 56, 56,
                                               linewidth=1, edgecolor='r', facecolor='none')
                     ax.add_patch(rect)
