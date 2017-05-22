@@ -156,7 +156,7 @@ def main():
                                               linewidth=1, edgecolor='r', facecolor='none')
                     ax.add_patch(rect)
                     ax.add_patch(rect2)
-                    plt.savefig(str(filename)+'.png')
+                    plt.savefig('Result/'+str(filename)+'.png')
                     print("episode:{}, gt:{}, pt: {}, step_count: {}".format(episode, gt[1], state_pt[1], step_count))
                     
                     plt.close()
@@ -172,7 +172,7 @@ def main():
                                                   linewidth=1, edgecolor='r', facecolor='none')
                         ax.add_patch(rect)
                         ax.add_patch(rect2)
-                        plt.savefig(str(filename)+'.png')
+                        plt.savefig('Result/'+str(filename)+'.png')
                         plt.close()
                         break
                     else:
@@ -188,7 +188,7 @@ def main():
                                               linewidth=1, edgecolor='r', facecolor='none')
                     ax.add_patch(rect)
                     ax.add_patch(rect2)
-                    plt.savefig(str(filename)+'.png')
+                    plt.savefig('Result/'+str(filename)+'.png')
                     plt.close()
 
                     break

@@ -14,7 +14,7 @@ cnn = np.load('/home/wd/Workspace/RL/dqn_cnn.npy')
 #   w3, w4, cnn,
 class DQN:
     
-    def __init__(self, sess, weight, w3, w4, cnn2, bias, input_size, output_size, name = 'main'):
+    def __init__(self, sess, weight, w3, w4, cnn2, bias, input_size, output_size, name='main'):
         self.sess = sess
         self.weight = weight
         self.cnn = cnn
@@ -24,8 +24,6 @@ class DQN:
         self.output_size = output_size
         self.w3 = w3
         self.w4 = w4
-#        self.w5 = w5
-#        self.filter_sizes = [5,5,3,3,3,1]
         self.filter_sizes = [5, 5, 7, 1]
         self.net_name = name
         self._build_network()
@@ -91,7 +89,7 @@ class DQN:
             
             # Second layer of weights
             self.W2 = tf.get_variable("W2", shape=[h_size, 5],
-                                 initializer=tf.contrib.layers.xavier_initializer())
+                                      initializer=tf.contrib.layers.xavier_initializer())
             fc2_mean, fc2_var = tf.nn.moments(tf.nn.tanh(tf.matmul(layer1, self.W2)), [0])
 
             self._Qpred = tf.matmul(layer1, self.W2)
@@ -118,8 +116,6 @@ class DQN:
         return self.sess.run(self.action_pr, feed_dict={self._X: x, self._H:h})
     
     def update(self, x_stack, y_stack, h_stack, a):
-#        print(self.sess.run(self.action_pr, feed_dict = {self._X: x_stack, self._H : h_stack}))
-#        print(self.sess.run(self.picked_action_pr, feed_dict = {self._X: x_stack, self._H : h_stack, self._A: a}))
 
         return self.sess.run([self._loss, self._train], feed_dict={
                 self._X: x_stack, self._Y: y_stack, self._H: h_stack, self._A: a})
