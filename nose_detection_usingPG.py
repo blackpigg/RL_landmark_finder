@@ -106,20 +106,20 @@ def _get_distance(box1, box2):
 def main():
     weight = np.load('/home/wd/Downloads/downloads/weight_170414.npy')
     bias = np.load('/home/wd/Downloads/downloads/bias_170414.npy')
-#    w3 = np.load('/home/wd/Workspace/RL/dqn_w1.npy')
-#    w4 = np.load('/home/wd/Workspace/RL/dqn_w2.npy')
     cnn_eye = np.load('/home/wd/Workspace/RL/eye_cnnweight.npy')
+    w1 = np.load('/home/wd/Workspace/RL/eye_weight1.npy')
+    w2 = np.load('/home/wd/Workspace/RL/eye_weight2.npy')
     w3 = np.load('/home/wd/Workspace/RL/eye_weight3.npy')
-    w4 = np.load('/home/wd/Workspace/RL/eye_weight4.npy')
 
-    max_episodes = 10000
 
-    f = open('/home/wd/Workspace/RL/print.txt','w')
+    max_episodes = 1000
+
+    f = open('/home/wd/Workspace/RL/print.txt', 'w')
     with tf.Session() as sess:
         
         # define policy network and value network
-        mainDQN = PG_conv.DQN(sess, weight, w3, w4, cnn_eye, bias, input_size, output_size, 'main')
-        value_estimator = PG_value.DQN(sess, weight, w3, w4, cnn_eye, bias, input_size, output_size, "target")
+        mainDQN = PG_conv.DQN(sess, weight, w1, w2, w3, cnn_eye, bias, input_size, output_size, "main")
+        value_estimator = PG_value.DQN(sess, weight, w1, w2, w3, cnn_eye, bias, input_size, output_size, "target")
 
         tf.global_variables_initializer().run()
         
@@ -127,71 +127,73 @@ def main():
             done = 0
             step_count = 0
             state, state_pt, gt, whole_image = env.reset()
+            print(episode)
             replay_buffer = []
             tr = collections.namedtuple("tr", ["state", "action", "reward", "next_state", "done", "history_buffer"])
             history_buffer = deque()
             for i in range(10):
                 history_buffer.append([0, 0, 0, 0, 0])
-            
-            for t in itertools.count():
-                filename = episode
-                plt.imshow(np.reshape(whole_image,(180,180)))
-                ax = plt.gca()
-                plt.plot(gt[0], gt[1], 'r+')
-                action_pr = mainDQN.predict(state, history_buffer)
-#                print(action_pr)
-                tmp_action = np.random.choice(np.arange(len(action_pr)), p=action_pr)
-#                print(tmp_action)
-                action = convertToOneHot(np.array([tmp_action]),5)
-                next_state, reward, done, new_state_pt = env.step(action[0])
-                plt.plot(new_state_pt[0], new_state_pt[1], 'k.')
-                plt.hold(True)
+            for j in range(10):
+                state, state_pt = env.rewind()
+                for t in itertools.count():
+                    filename = episode
+                    plt.imshow(np.reshape(whole_image,(130, 130)))
+                    ax = plt.gca()
+                    plt.plot(gt[0], gt[1], 'r+')
+                    action_pr = mainDQN.predict(state, history_buffer)
+    #                print(action_pr)
+                    tmp_action = np.random.choice(np.arange(len(action_pr)), p=action_pr)
+    #                print(tmp_action)
+                    action = convertToOneHot(np.array([tmp_action]), 5)
+                    next_state, reward, done, new_state_pt = env.step(action[0])
+                    plt.plot(new_state_pt[0], new_state_pt[1], 'k.')
+                    plt.hold(True)
 
-                if 1 == done and reward == 1:
-                    plt.plot(state_pt[0],state_pt[1], 'b+')
-                    plt.plot(new_state_pt[0],new_state_pt[1], 'ro')
-                    rect = patches.Rectangle((new_state_pt[0]-13.5,new_state_pt[1]-13.5), 28, 28,
-                                             linewidth=1, edgecolor='b', facecolor='none')
-                    rect2 = patches.Rectangle((gt[0]-28, gt[1]-28), 56, 56,
-                                              linewidth=1, edgecolor='r', facecolor='none')
-                    ax.add_patch(rect)
-                    ax.add_patch(rect2)
-                    plt.savefig('Result/'+str(filename)+'.png')
-                    print("episode:{}, gt:{}, pt: {}, step_count: {}".format(episode, gt[1], state_pt[1], step_count))
-                    
-                    plt.close()
-                    break
-                
-                elif 1 == done and reward == -1: 
-                    if episode % 100 == 0:
-                        plt.plot(state_pt[0],state_pt[1], 'b+')
-                        plt.plot(new_state_pt[0], new_state_pt[1], 'bo')
-                        rect = patches.Rectangle((new_state_pt[0]-13.5,new_state_pt[1]-13.5), 28, 28,
+                    if 1 == done and reward == 1:
+                        plt.plot(state_pt[0], state_pt[1], 'b+')
+                        plt.plot(new_state_pt[0], new_state_pt[1], 'ro')
+                        rect = patches.Rectangle((new_state_pt[0]-13.5, new_state_pt[1]-13.5), 28, 28,
                                                  linewidth=1, edgecolor='b', facecolor='none')
                         rect2 = patches.Rectangle((gt[0]-28, gt[1]-28), 56, 56,
                                                   linewidth=1, edgecolor='r', facecolor='none')
                         ax.add_patch(rect)
                         ax.add_patch(rect2)
-                        plt.savefig('Result/'+str(filename)+'.png')
+                        plt.savefig('Result/'+str(filename)+'_'+str(j)+'.png')
+                        print("episode:{}, gt:{}, pt: {}, step_count: {}".format(episode, gt[1], state_pt[1], step_count))
+
                         plt.close()
                         break
-                    else:
-                        plt.close()
-                    break
-                elif step_count > 50:
-                    reward = -1 
-                    plt.plot(state_pt[0], state_pt[1], 'b+')
-                    plt.plot(new_state_pt[0], new_state_pt[1], 'bo')
-                    rect = patches.Rectangle((new_state_pt[0]-13.5, new_state_pt[1]-13.5), 28, 28,
-                                             linewidth=1, edgecolor='b', facecolor='none')
-                    rect2 = patches.Rectangle((gt[0]-28, gt[1]-28), 56, 56,
-                                              linewidth=1, edgecolor='r', facecolor='none')
-                    ax.add_patch(rect)
-                    ax.add_patch(rect2)
-                    plt.savefig('Result/'+str(filename)+'.png')
-                    plt.close()
 
-                    break
+                    elif 1 == done and reward == -1:
+                        if episode % 100 == 0:
+                            plt.plot(state_pt[0], state_pt[1], 'b+')
+                            plt.plot(new_state_pt[0], new_state_pt[1], 'bo')
+                            rect = patches.Rectangle((new_state_pt[0]-13.5,new_state_pt[1]-13.5), 28, 28,
+                                                     linewidth=1, edgecolor='b', facecolor='none')
+                            rect2 = patches.Rectangle((gt[0]-28, gt[1]-28), 56, 56,
+                                                      linewidth=1, edgecolor='r', facecolor='none')
+                            ax.add_patch(rect)
+                            ax.add_patch(rect2)
+                            plt.savefig('Result/'+str(filename)+'_'+str(j)+'.png')
+                            plt.close()
+                            break
+                        else:
+                            plt.close()
+                        break
+                    elif step_count > 50:
+                        reward = -1
+                        plt.plot(state_pt[0], state_pt[1], 'b+')
+                        plt.plot(new_state_pt[0], new_state_pt[1], 'bo')
+                        rect = patches.Rectangle((new_state_pt[0]-13.5, new_state_pt[1]-13.5), 28, 28,
+                                                 linewidth=1, edgecolor='b', facecolor='none')
+                        rect2 = patches.Rectangle((gt[0]-28, gt[1]-28), 56, 56,
+                                                  linewidth=1, edgecolor='r', facecolor='none')
+                        ax.add_patch(rect)
+                        ax.add_patch(rect2)
+                        plt.savefig('Result/'+str(filename)+'_'+str(j)+'.png')
+                        plt.close()
+
+                        break
                 history_buffer.popleft()
                 history_buffer.append(action[0])
                 replay_buffer.append(tr(state, action, reward, next_state, done, history_buffer))

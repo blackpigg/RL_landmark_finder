@@ -91,24 +91,25 @@ class NDEnv(gym.Env):
         self.height = length
         
         #define scale of environment
-        self.scale_factor = 1.8
+        self.scale_factor = 1.3
         self.nrow = np.shape(self.image[0])[1]*self.scale_factor
         self.ncol = np.shape(self.image[0])[1]*self.scale_factor
-        
+
         #define number of action: up, down, left, right, trigger
         self.action_space = spaces.Discrete(5)
-        self._reset()          
+        self._reset()
+        self.rewind()
 #=======================================================================================================================        
 # initialize environment and agent
     def _reset(self):
         
          # index of image at dataset
-        self.idx = random.randint(0,9995) 
-        self.desc = self.image[self.idx,:,:,:] 
+        self.idx = random.randint(0, 9995)
+        self.desc = self.image[self.idx, :, :, :]
         # rotate image
         self.desc = np.moveaxis(self.desc, 1, 2)
         # resize image
-        self.desc = scipy.misc.imresize(self.desc[0], (180 ,180))
+        self.desc = scipy.misc.imresize(self.desc[0], (130 ,130))
         
         # get label of image
         self.eye_label = self.label[self.idx,0:2]
@@ -119,24 +120,40 @@ class NDEnv(gym.Env):
         self.gt_y = self.eye_label[1]*self.scale_factor
         self.gt = [self.gt_x, self.gt_y ]
         
-        gt_box_scale = 0.5
-        self.gt_box = [self.gt_x-gt_box_scale*self.width, self.gt_y-gt_box_scale*self.height,
-                       self.gt_x+gt_box_scale*self.width, self.gt_y+gt_box_scale*self.height]
+        self.gt_box_scale = 0.5
+        self.gt_box = [self.gt_x-self.gt_box_scale*self.width, self.gt_y-self.gt_box_scale*self.height,
+                       self.gt_x+self.gt_box_scale*self.width, self.gt_y+self.gt_box_scale*self.height]
         
         # initialize point of agent
             # self.x, self.y are upper-left point of agent
-        self.x = np.random.randint(low = max(0,self.gt_x-1.5*gt_box_scale*self.width-13.5), \
-                                   high = min(self.gt_x+1.5*gt_box_scale*self.width-13.5, self.nrow-self.width))
+        self.x = np.random.randint(low = max(0,self.gt_x-1.5*self.gt_box_scale*self.width-13.5), \
+                                   high = min(self.gt_x+1.5*self.gt_box_scale*self.width-13.5, self.nrow-self.width))
         
-        self.y = np.random.randint(low = max(0,self.gt_y-1.5*gt_box_scale*self.width-13.5), \
-                                   high = min(self.gt_y+1.5*gt_box_scale*self.width-13.5, self.nrow-self.width))
+        self.y = np.random.randint(low = max(0,self.gt_y-1.5*self.gt_box_scale*self.width-13.5), \
+                                   high = min(self.gt_y+1.5*self.gt_box_scale*self.width-13.5, self.nrow-self.width))
         
         # state_pt : center point of agent
         self.state_pt = [self.x+13.5, self.y+13.5]
         self.state_pt = np.asarray(self.state_pt)
         self.state = np.reshape(self.desc[self.x:self.x+self.width, self.y:self.y+self.height] ,(1,784))                                                                                   
         
-        return self.state , self.state_pt, self.gt, self.desc
+        return self.state, self.state_pt, self.gt, self.desc
+
+
+    def rewind(self):
+
+        self.x = np.random.randint(low=max(0, self.gt_x - 1.5 *self.gt_box_scale * self.width - 13.5),
+                               high=min(self.gt_x + 1.5 * self.gt_box_scale * self.width - 13.5, self.nrow - self.width))
+
+
+        self.y = np.random.randint(low=max(0, self.gt_y - 1.5 * self.gt_box_scale * self.width - 13.5),
+                           high=min(self.gt_y + 1.5 * self.gt_box_scale * self.width - 13.5, self.nrow - self.width))
+
+        # state_pt : center point of agent
+        self.state_pt = [self.x + 13.5, self.y + 13.5]
+        self.state_pt = np.asarray(self.state_pt)
+        self.state = np.reshape(self.desc[self.x:self.x + self.width, self.y:self.y + self.height], (1, 784))
+        return self.state, self.state_pt
 #=======================================================================================================================
 # define how state move
     def step(self, action):

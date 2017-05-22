@@ -24,7 +24,7 @@ class SL:
     def _build_network(self, h_size=256, l_rate=1e-1):
         with tf.variable_scope(self.net_name):           
             self._X  = tf.placeholder(tf.float32, [None, self.input_size])
-            self._C = tf.placeholder(tf.float32, [None, 1])
+            self._C = tf.placeholder(tf.float32, [None, 2])
             self._A = tf.placeholder(tf.float32,[None, 5])
 
             self.x_tensor  = tf.reshape(self._X, [-1, 28, 28, 1])
@@ -65,25 +65,21 @@ class SL:
             self.W1 = tf.get_variable("W1", shape=[512, h_size],
                                  initializer = tf.contrib.layers.xavier_initializer())
             
-            fc1_mean, fc1_var = tf.nn.moments(tf.nn.tanh(tf.matmul(self.current_input, self.W1)), [0])
-#            
-            layer1 = tf.nn.dropout(
-                    tf.nn.batch_normalization(tf.nn.tanh(tf.matmul(self.current_input, self.W1)), fc1_mean, fc1_var,\
-                                                          1e-5, 1, 1e-2), keep_prob = 0.7)
+#
+            layer1 = tf.nn.dropout(tf.nn.tanh(tf.matmul(self.current_input, self.W1)), keep_prob=0.7)
 #=======================================================================================================================           
 #action predict layer(2-1)
             self.W2 = tf.get_variable("W2", shape=[h_size, 5],
                                  initializer = tf.contrib.layers.xavier_initializer())
 
             self._apred = tf.matmul(layer1, self.W2)
-            self.loss1 = tf.nn.softmax_cross_entropy_with_logits(logits = self._apred, labels = self._A)
+            self.loss1 = tf.nn.softmax_cross_entropy_with_logits(logits=self._apred, labels=self._A)
 #=======================================================================================================================           
 #class predict layer(2-2)
-            self.W3 = tf.get_variable("W3", shape=[h_size, 1],
-                                 initializer = tf.contrib.layers.xavier_initializer())
+            self.W3 = tf.get_variable("W3", shape=[h_size, 2], initializer=tf.contrib.layers.xavier_initializer())
             
             self._cpred = tf.matmul(layer1, self.W3)
-            self.loss2 = tf.nn.softmax_cross_entropy_with_logits(logits = self._cpred, labels = self._C)
+            self.loss2 = tf.nn.softmax_cross_entropy_with_logits(logits=self._cpred, labels=self._C)
             
             #Loss function
             self._loss = tf.reduce_mean(self.loss1+self.loss2)
@@ -96,8 +92,8 @@ class SL:
         return self.sess.run(self._apred, feed_dict = {self._X: x})
 
     def update(self, x_stack, a_stack, c_stack):
-        print(self.sess.run([self._loss], feed_dict={
-                self._X: x_stack, self._A: a_stack, self._C: c_stack}))
+        # print(self.sess.run([self._loss], feed_dict={
+        #         self._X: x_stack, self._A: a_stack, self._C: c_stack}))
         return self.sess.run([self._loss, self._train], feed_dict={
                 self._X: x_stack, self._A: a_stack, self._C: c_stack})
     def savecnn(self):

@@ -14,21 +14,17 @@ cnn = np.load('/home/wd/Workspace/RL/dqn_cnn.npy')
 #   w3, w4, cnn,
 class DQN:
     
-    def __init__(self, sess, weight, w3, w4, cnn2, bias, input_size, output_size, name = 'main'):
+    def __init__(self, sess, weight, w1, w2, w3, cnn_eye, bias, input_size, output_size, name = 'main'):
         self.sess = sess
         self.weight = weight
-        self.cnn = cnn
-#        print(np.shape(cnn))
-        self.cnn2= cnn2
-
+        self.cnn = cnn_eye
+        self.w1 = w1
+        self.w2 = w2
+        self.w3 = w3
         self.bias = bias
         self.input_size = input_size
         self.output_size = output_size
-        self.w3 = w3
-        self.w4 = w4
-#        self.w5 = w5
-#        self.filter_sizes = [5,5,3,3,3,1]
-        self.filter_sizes = [5,5,7,1]
+        self.filter_sizes = [5, 5, 7, 1]
         self.net_name = name
         self._build_network()
         
