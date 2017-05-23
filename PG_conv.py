@@ -41,13 +41,14 @@ class DQN:
 
             for layer_i, n_output in enumerate([64, 128, 256 , 512]):
                 n_input = self.current_input.get_shape().as_list()[3]
-                W = tf.Variable(
-                        tf.random_uniform([
-                            self.filter_sizes[layer_i],
-                            self.filter_sizes[layer_i],
-                            n_input, n_output],
-                            -1.0 / math.sqrt(n_input),
-                            1.0 / math.sqrt(n_input)), name='CNN')
+                # W = tf.Variable(
+                #         tf.random_uniform([
+                #             self.filter_sizes[layer_i],
+                #             self.filter_sizes[layer_i],
+                #             n_input, n_output],
+                #             -1.0 / math.sqrt(n_input),
+                #             1.0 / math.sqrt(n_input)), name='CNN')
+                W = tf.Variable(initial_value=self.cnn[layer_i], trainable=True)
                 b = tf.Variable(tf.zeros([n_output]))
                 if 2 > layer_i:
                    # batch_mean, batch_var = tf.nn.moments(tf.nn.conv2d(
@@ -77,7 +78,8 @@ class DQN:
             # First layer of weights
             self.W1 = tf.get_variable("W1", shape=[562, h_size],
                                       initializer=tf.contrib.layers.xavier_initializer())
-            
+
+
             fc1_mean, fc1_var = tf.nn.moments(tf.nn.tanh(tf.matmul(self.fc_input, self.W1)), [0])
 #            fc1_beta = tf.Variable(tf.constant(0.0, shape = [h_size]))
 #            fc1_gamma = tf.Variable(tf.constant(1.0, shape =  [h_size])) 
@@ -88,8 +90,9 @@ class DQN:
                                                           1e-5, 1, 1e-2), keep_prob = 0.7)
             
             # Second layer of weights
-            self.W2 = tf.get_variable("W2", shape=[h_size, 5],
-                                      initializer=tf.contrib.layers.xavier_initializer())
+            # self.W2 = tf.get_variable("W2", shape=[h_size, 5],
+            #                           initializer=tf.contrib.layers.xavier_initializer())
+            self.W2 = tf.Variable(initial_value=self.w2, trainable=True)
             fc2_mean, fc2_var = tf.nn.moments(tf.nn.tanh(tf.matmul(layer1, self.W2)), [0])
 
             self._Qpred = tf.matmul(layer1, self.W2)
@@ -106,7 +109,7 @@ class DQN:
             self._train = tf.train.AdamOptimizer(
                     learning_rate=l_rate).minimize(self._loss)
             
-    def predict(self,state, history):
+    def predict(self, state, history):
        # x = np.reshape(self.get_processed_state(state), [None, 256])
         x = np.reshape(state, [1,784])
         

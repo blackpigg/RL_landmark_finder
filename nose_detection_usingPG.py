@@ -112,7 +112,7 @@ def main():
     w3 = np.load('/home/wd/Workspace/RL/eye_weight3.npy')
 
 
-    max_episodes = 1000
+    max_episodes = 10000
 
     f = open('/home/wd/Workspace/RL/print.txt', 'w')
     with tf.Session() as sess:
@@ -127,7 +127,6 @@ def main():
             done = 0
             step_count = 0
             state, state_pt, gt, whole_image = env.reset()
-            print(episode)
             replay_buffer = []
             tr = collections.namedtuple("tr", ["state", "action", "reward", "next_state", "done", "history_buffer"])
             history_buffer = deque()
@@ -158,7 +157,7 @@ def main():
                                                   linewidth=1, edgecolor='r', facecolor='none')
                         ax.add_patch(rect)
                         ax.add_patch(rect2)
-                        plt.savefig('Result/'+str(filename)+'_'+str(j)+'.png')
+                        plt.savefig('Result/'+str(filename)+'.png')
                         print("episode:{}, gt:{}, pt: {}, step_count: {}".format(episode, gt[1], state_pt[1], step_count))
 
                         plt.close()
@@ -174,7 +173,7 @@ def main():
                                                       linewidth=1, edgecolor='r', facecolor='none')
                             ax.add_patch(rect)
                             ax.add_patch(rect2)
-                            plt.savefig('Result/'+str(filename)+'_'+str(j)+'.png')
+                            plt.savefig('Result/'+str(filename)+'.png')
                             plt.close()
                             break
                         else:
@@ -190,7 +189,7 @@ def main():
                                                   linewidth=1, edgecolor='r', facecolor='none')
                         ax.add_patch(rect)
                         ax.add_patch(rect2)
-                        plt.savefig('Result/'+str(filename)+'_'+str(j)+'.png')
+                        plt.savefig('Result/'+str(filename)+'.png')
                         plt.close()
 
                         break
