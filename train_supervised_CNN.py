@@ -90,7 +90,7 @@ def main():
         training_batch.append((state, state_pt, gt))
 #    print(np.shape(training_batch[0][0]))
     with tf.Session() as sess:
-        SL_net = PG_supervised_CNN_action_class.SL(sess, input_size, output_size)
+        SL_net = PG_supervised_CNN_action_class.CNN_SL(sess, input_size, output_size)
         tf.global_variables_initializer().run()
         for i in range(5):
             np.random.shuffle(training_batch)
@@ -101,10 +101,10 @@ def main():
                     print(j, accuracy)
                     print(np.argmax((SL_net.predict(training_batch[j][0][0]))), SL_net.predict(training_batch[j][0]),
                             (training_batch[j][1] - training_batch[j][2]))
-            eye_w1 = SL_net.save_w1()
-            eye_w2 = SL_net.save_w2()
-            eye_w3 = SL_net.save_w3()
-            eye_cnn = SL_net.savecnn()
+            eye_w1 = SL_net.get_wc1()
+            eye_w2 = SL_net.get_wc2()
+            eye_w3 = SL_net.get_wc3()
+            eye_cnn = SL_net.get_cnn_weights()
 
             np.save('data/eye_weight1.npy', eye_w1)
             np.save('data/eye_weight2.npy', eye_w2)
@@ -113,5 +113,5 @@ def main():
             
         # f.close()
 
-if __name__== "__main__":
+if __name__=="__main__":
     main()

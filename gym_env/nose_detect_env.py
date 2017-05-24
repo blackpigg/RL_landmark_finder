@@ -118,7 +118,7 @@ class NDEnv(gym.Env):
         #scaling label
         self.gt_x = self.eye_label[0]*self.scale_factor
         self.gt_y = self.eye_label[1]*self.scale_factor
-        self.gt = [self.gt_x, self.gt_y ]
+        self.gt = [self.gt_x, self.gt_y]
         
         self.gt_box_scale = 0.5
         self.gt_box = [self.gt_x-self.gt_box_scale*self.width, self.gt_y-self.gt_box_scale*self.height,
@@ -126,16 +126,25 @@ class NDEnv(gym.Env):
         
         # initialize point of agent
             # self.x, self.y are upper-left point of agent
-        self.x = np.random.randint(low = max(0,self.gt_x-1.5*self.gt_box_scale*self.width-13.5), \
-                                   high = min(self.gt_x+1.5*self.gt_box_scale*self.width-13.5, self.nrow-self.width))
-        
-        self.y = np.random.randint(low = max(0,self.gt_y-1.5*self.gt_box_scale*self.width-13.5), \
-                                   high = min(self.gt_y+1.5*self.gt_box_scale*self.width-13.5, self.nrow-self.width))
+        # self.x = np.random.randint(low = max(0,self.gt_x-1.5*self.gt_box_scale*self.width-13.5), \
+        #                            high = min(self.gt_x+1.5*self.gt_box_scale*self.width-13.5, self.nrow-self.width))
+        #
+        # self.y = np.random.randint(low = max(0,self.gt_y-1.5*self.gt_box_scale*self.width-13.5), \
+        #                            high = min(self.gt_y+1.5*self.gt_box_scale*self.width-13.5, self.nrow-self.width))
+        self.x = 0
+        self.y = 0
+        while self.x<=0 or self.y<=0:
+            epsilon = np.random.multivariate_normal(mean=[0, 0], cov=[[5, 0], [0, 5]])
+            center_point = [self.gt_x, self.gt_y] + epsilon
+            self.x = center_point[0]-13.5
+            self.y = center_point[1]-13.5
         
         # state_pt : center point of agent
         self.state_pt = [self.x+13.5, self.y+13.5]
         self.state_pt = np.asarray(self.state_pt)
-        self.state = np.reshape(self.desc[self.x:self.x+self.width, self.y:self.y+self.height] ,(1,784))                                                                                   
+        # print(self.x)
+        # print(self.y)
+        self.state = np.reshape(self.desc[self.x:self.x+self.width, self.y:self.y+self.height], (1, 784))
         
         return self.state, self.state_pt, self.gt, self.desc
 
